@@ -28,7 +28,6 @@ void CrossfireReceiver::loop() {
         long timeDelta = currTime - lastReceiveTime;
         if (timeDelta > CRSF_TIME_NEEDED_PER_FRAME_US) {
             lastBufferSize = buffer.size();
-            processBuffer();
             buffer.clear();
         }
 
@@ -36,10 +35,11 @@ void CrossfireReceiver::loop() {
         buffer.push_back(c);
         lastReceiveTime = currTime;
         ++totalBytesReceived;
+        tryParseBuffer();
     }
 }
 
-void CrossfireReceiver::processBuffer() {
+void CrossfireReceiver::tryParseBuffer() {
     if (buffer.size() < 5) {
         return;
     }
@@ -51,6 +51,8 @@ void CrossfireReceiver::processBuffer() {
     if (frame->type != CRSF_FRAMETYPE_RC_CHANNELS_PACKED) {
         return;
     }
+
+    // todo: crc check
 
     crsfPayloadRcChannelsPacked_t* rcChannels = (crsfPayloadRcChannelsPacked_t*)&frame->payload;
 
@@ -72,4 +74,5 @@ void CrossfireReceiver::processBuffer() {
     channels[15] = rcChannels->chan15;
 
     ++successParse;
+    buffer.clear();
 }

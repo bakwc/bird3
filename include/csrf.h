@@ -7,7 +7,7 @@ public:
     void setup();
     uint32_t getChannel(int channelID);
 private:
-    void processBuffer();
+    void tryParseBuffer();
 public:
     int lastBufferSize = 0;
     long totalBytesReceived = 0;
