@@ -5,7 +5,9 @@
 
 
 
-CrossfireReceiver::CrossfireReceiver() {
+CrossfireReceiver::CrossfireReceiver(HardwareSerial& serial)
+    : serial(serial)
+{
     buffer.reserve(CRSF_FRAME_SIZE_MAX * 2);
     channels.resize(CRSF_MAX_CHANNEL);
 }
@@ -18,24 +20,44 @@ uint32_t CrossfireReceiver::getChannel(int channelID) {
 }
 
 void CrossfireReceiver::setup() {
-    Serial1.begin(CRSF_BAUDRATE);
+    serial.begin(CRSF_BAUDRATE);
+}
+
+void CrossfireReceiver::setRedirectSerial(HardwareSerial* redirectSerial) {
+    serialRedirect = redirectSerial;
+    serialRedirect->begin(CRSF_BAUDRATE);
 }
 
 void CrossfireReceiver::loop() {
     unsigned long currTime = micros();
-    while (Serial1.available()) {
 
+    while (serial.available()) {
         long timeDelta = currTime - lastReceiveTime;
         if (timeDelta > CRSF_TIME_NEEDED_PER_FRAME_US) {
             lastBufferSize = buffer.size();
+            retranslateBuffer();
             buffer.clear();
         }
 
-        unsigned char c = Serial1.read();
+        unsigned char c = serial.read();
         buffer.push_back(c);
         lastReceiveTime = currTime;
         ++totalBytesReceived;
         tryParseBuffer();
+    }
+
+    if (serialRedirect) {
+        while (serialRedirect->available()) {
+            serial.write(serialRedirect->read());
+        }
+    }
+}
+
+void CrossfireReceiver::retranslateBuffer() {
+    if (serialRedirect) {
+        for (int i = 0; i < buffer.size(); ++i) {
+            serialRedirect->write((int)buffer[i]);
+        }
     }
 }
 
@@ -74,5 +96,7 @@ void CrossfireReceiver::tryParseBuffer() {
     channels[15] = rcChannels->chan15;
 
     ++successParse;
+
+    retranslateBuffer();
     buffer.clear();
 }
