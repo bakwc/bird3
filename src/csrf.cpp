@@ -10,13 +10,23 @@ CrossfireReceiver::CrossfireReceiver(HardwareSerial& serial)
 {
     buffer.reserve(CRSF_FRAME_SIZE_MAX * 2);
     channels.resize(CRSF_MAX_CHANNEL);
+    channelOverrides.resize(CRSF_MAX_CHANNEL);
+    for (int i = 0; i < channelOverrides.size(); ++i) {
+        channelOverrides[i] = -1;
+    }
 }
 
-uint32_t CrossfireReceiver::getChannel(int channelID) {
+int32_t CrossfireReceiver::getChannel(int channelID) {
     if (channelID < channels.size()) {
         return channels[channelID];
     }
-    return 0;
+    return -1;
+}
+
+void CrossfireReceiver::setChannelOverride(int channelID, int32_t newValue) {
+    if (channelID < channelOverrides.size()) {
+        channelOverrides[channelID] = newValue;
+    }
 }
 
 void CrossfireReceiver::setup() {
@@ -94,6 +104,23 @@ void CrossfireReceiver::tryParseBuffer() {
     channels[13] = rcChannels->chan13;
     channels[14] = rcChannels->chan14;
     channels[15] = rcChannels->chan15;
+
+    if (channelOverrides[0] != -1) rcChannels->chan0 = channelOverrides[0];
+    if (channelOverrides[1] != -1) rcChannels->chan1 = channelOverrides[1];
+    if (channelOverrides[2] != -1) rcChannels->chan2 = channelOverrides[2];
+    if (channelOverrides[3] != -1) rcChannels->chan3 = channelOverrides[3];
+    if (channelOverrides[4] != -1) rcChannels->chan4 = channelOverrides[4];
+    if (channelOverrides[5] != -1) rcChannels->chan5 = channelOverrides[5];
+    if (channelOverrides[6] != -1) rcChannels->chan6 = channelOverrides[6];
+    if (channelOverrides[7] != -1) rcChannels->chan7 = channelOverrides[7];
+    if (channelOverrides[8] != -1) rcChannels->chan8 = channelOverrides[8];
+    if (channelOverrides[9] != -1) rcChannels->chan9 = channelOverrides[9];
+    if (channelOverrides[10] != -1) rcChannels->chan10 = channelOverrides[10];
+    if (channelOverrides[11] != -1) rcChannels->chan11 = channelOverrides[11];
+    if (channelOverrides[12] != -1) rcChannels->chan12 = channelOverrides[12];
+    if (channelOverrides[13] != -1) rcChannels->chan13 = channelOverrides[13];
+    if (channelOverrides[14] != -1) rcChannels->chan14 = channelOverrides[14];
+    if (channelOverrides[15] != -1) rcChannels->chan15 = channelOverrides[15];
 
     ++successParse;
 

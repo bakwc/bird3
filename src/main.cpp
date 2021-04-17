@@ -1,18 +1,27 @@
 #include <Arduino.h>
 
+#include <VL53L1X.h>
+
 #include "csrf.h"
+#include "sensors.h"
 
 CrossfireReceiver receiver(Serial1);
+Sensors sensors;
+
 unsigned long lastDebug = 0;
 
 unsigned long readFromSerial1 = 0;
 unsigned long readFromSerial2 = 0;
 
 void setup() {
+    Serial.begin(9600);
+    Wire.begin();
+    Wire.setClock(400000); // use 400 kHz I2C
+
     receiver.setup();
     receiver.setRedirectSerial(&Serial2);
 
-    Serial.begin(9600);
+    sensors.setup();
 
 //    Serial1.begin(420000);
 //    Serial2.begin(420000);
@@ -20,6 +29,8 @@ void setup() {
 
 void loop() {
     receiver.loop();
+    sensors.loop();
+
     auto currTime = millis();
 
 //    while (Serial1.available()) {
@@ -51,7 +62,14 @@ void loop() {
 //            Serial.print(" = ");
 //            Serial.println(receiver.getChannel(i));
 //        }
-        Serial.println(receiver.getChannel(2));
+        for (int i = 0; i < 16; ++i) {
+            Serial.print("c");
+            Serial.print(i);
+            Serial.print(":");
+            Serial.print(receiver.getChannel(i));
+            Serial.print("; ");
+        }
+        Serial.println();
         lastDebug = currTime;
     }
 // write your code here

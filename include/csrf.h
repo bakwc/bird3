@@ -6,7 +6,8 @@ public:
     void loop();
     void setup();
     void setRedirectSerial(HardwareSerial* redirectSerial);
-    uint32_t getChannel(int channelID);
+    int32_t getChannel(int channelID);
+    void setChannelOverride(int channelID, int32_t newValue); // -1 to disable override
 private:
     void tryParseBuffer();
     void retranslateBuffer();
@@ -17,7 +18,8 @@ public:
     int lastFrameLen = 0;
 private:
     std::vector<unsigned char> buffer;
-    std::vector<uint32_t> channels;
+    std::vector<int32_t> channels;
+    std::vector<int32_t> channelOverrides;
     unsigned long lastReceiveTime = 0; // microseconds
     HardwareSerial& serial;
     HardwareSerial* serialRedirect = nullptr;
