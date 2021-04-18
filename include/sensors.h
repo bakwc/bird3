@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Wire.h>
 #include <VL53L1X.h>
 
@@ -12,7 +14,8 @@ public:
     Sensors();
     void loop();
     void setup();
-    int getDistance();
+    int getDistance() const;
+    bool isInitialized() const;
 private:
     VL53L1X sensor;
     bool initialized = false;

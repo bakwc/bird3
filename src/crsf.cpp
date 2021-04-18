@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
-#include "csrf.h"
+#include "crsf.h"
 #include "csrf_protocol.h"
-
+#include "crc.h"
 
 
 CrossfireReceiver::CrossfireReceiver(HardwareSerial& serial)
@@ -71,6 +71,16 @@ void CrossfireReceiver::retranslateBuffer() {
     }
 }
 
+static uint8_t crsfFrameCRC(crsfFrameDef_t* frame)
+{
+    // CRC includes type and payload
+    uint8_t crc = crc8_dvb_s2(0, frame->type);
+    for (int ii = 0; ii < frame->frameLength - CRSF_FRAME_LENGTH_TYPE_CRC; ++ii) {
+        crc = crc8_dvb_s2(crc, frame->payload[ii]);
+    }
+    return crc;
+}
+
 void CrossfireReceiver::tryParseBuffer() {
     if (buffer.size() < 5) {
         return;
@@ -81,10 +91,21 @@ void CrossfireReceiver::tryParseBuffer() {
         return;
     }
     if (frame->type != CRSF_FRAMETYPE_RC_CHANNELS_PACKED) {
+        retranslateBuffer();
+        buffer.clear();
         return;
     }
 
-    // todo: crc check
+    uint8_t crc = crsfFrameCRC(frame);
+    if (crc != buffer.back()) {
+//        Serial.print("wrong crc: calculated = ");
+//        Serial.print((float)crc);
+//        Serial.print("; received = ");
+//        Serial.println((float)buffer.back());
+        retranslateBuffer();
+        buffer.clear();
+        return;
+    }
 
     crsfPayloadRcChannelsPacked_t* rcChannels = (crsfPayloadRcChannelsPacked_t*)&frame->payload;
 
@@ -121,6 +142,9 @@ void CrossfireReceiver::tryParseBuffer() {
     if (channelOverrides[13] != -1) rcChannels->chan13 = channelOverrides[13];
     if (channelOverrides[14] != -1) rcChannels->chan14 = channelOverrides[14];
     if (channelOverrides[15] != -1) rcChannels->chan15 = channelOverrides[15];
+
+    crc = crsfFrameCRC(frame);
+    buffer.back() = crc;
 
     ++successParse;
 

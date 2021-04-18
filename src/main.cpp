@@ -2,11 +2,13 @@
 
 #include <VL53L1X.h>
 
-#include "csrf.h"
+#include "crsf.h"
 #include "sensors.h"
+#include "altitude_holder.h"
 
 CrossfireReceiver receiver(Serial1);
 Sensors sensors;
+AltitudeHolder altitudeHolder(receiver, sensors);
 
 unsigned long lastDebug = 0;
 
@@ -23,6 +25,8 @@ void setup() {
 
     sensors.setup();
 
+    altitudeHolder.setup();
+
 //    Serial1.begin(420000);
 //    Serial2.begin(420000);
 }
@@ -30,6 +34,7 @@ void setup() {
 void loop() {
     receiver.loop();
     sensors.loop();
+    altitudeHolder.loop();
 
     auto currTime = millis();
 
@@ -62,6 +67,10 @@ void loop() {
 //            Serial.print(" = ");
 //            Serial.println(receiver.getChannel(i));
 //        }
+
+
+        /*
+
         for (int i = 0; i < 16; ++i) {
             Serial.print("c");
             Serial.print(i);
@@ -70,6 +79,8 @@ void loop() {
             Serial.print("; ");
         }
         Serial.println();
+
+        */
         lastDebug = currTime;
     }
 // write your code here

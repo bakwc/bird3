@@ -10,9 +10,9 @@ void Sensors::setup() {
     sensor.setTimeout(300);
     initialized = sensor.init();
     if (initialized) {
-        sensor.setDistanceMode(VL53L1X::Long);
-        sensor.setMeasurementTimingBudget(50000);
-        sensor.startContinuous(50);
+        sensor.setDistanceMode(VL53L1X::Short);
+        sensor.setMeasurementTimingBudget(10000);
+        sensor.startContinuous(10);
     }
 }
 
@@ -29,6 +29,10 @@ void Sensors::loop() {
     }
 }
 
-int Sensors::getDistance() {
+int Sensors::getDistance() const {
     return lastDistance;
+}
+
+bool Sensors::isInitialized() const {
+    return initialized;
 }

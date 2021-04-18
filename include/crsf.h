@@ -1,4 +1,8 @@
+#pragma once
+
 #include <vector>
+
+#include "Arduino.h"
 
 class CrossfireReceiver {
 public:
