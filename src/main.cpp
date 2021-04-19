@@ -69,7 +69,7 @@ void loop() {
 //        }
 
 
-        /*
+       // /*
 
         for (int i = 0; i < 16; ++i) {
             Serial.print("c");
@@ -80,7 +80,7 @@ void loop() {
         }
         Serial.println();
 
-        */
+       // */
         lastDebug = currTime;
     }
 // write your code here

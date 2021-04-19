@@ -17,6 +17,8 @@ private:
     PID pid;
     int lastThrust = 0;
     int lastHeight = 0;
+    int lastTarget = 0;
+    double filterAcc = 0;
     unsigned long lastThrustChangeTime = 0;
     unsigned long tickNum = 0;
 };
