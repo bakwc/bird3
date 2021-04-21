@@ -74,6 +74,9 @@ int AltitudeHolder::calculateThrust() {
         Serial.print("Target Height: ");
         Serial.println(lastTarget);
 
+        Serial.print("Raw Height: ");
+        Serial.println(rawValue);
+
         Serial.print("Filtered Height: ");
         Serial.println(filterAcc);
 
